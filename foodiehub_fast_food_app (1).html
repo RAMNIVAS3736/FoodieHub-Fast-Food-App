@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodieHub - Premium Fast Food Express</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        wood: {
+                            800: '#22150c',
+                            900: '#140c07',
+                            950: '#0a0502',
+                            accent: '#3d2314'
+                        },
+                        fire: {
+                            500: '#ff4500',
+                            600: '#e63900',
+                            700: '#cc2e00'
+                        },
+                        amber: {
+                            gold: '#ffb700'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0502;
+            background-image: 
+                radial-gradient(rgba(255, 69, 0, 0.08) 1px, transparent 0),
+                linear-gradient(to bottom, rgba(20, 12, 7, 0.95), rgba(10, 5, 2, 0.98)),
+                url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=80');
+            background-repeat: repeat, no-repeat, no-repeat;
+            background-size: 20px 20px, cover, cover;
+            background-attachment: fixed;
+            color: #f3f4f6;
+        }
+
+        /* Metallic top navbar texture */
+        .metallic-navbar {
+            background: linear-gradient(180deg, #3a3f47 0%, #1a1d24 50%, #0f1115 100%);
+            border-bottom: 2px solid #ff4500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+
+        .wood-card {
+            background: linear-gradient(145deg, #22150c 0%, #150d07 100%);
+            border: 1px solid rgba(255, 69, 0, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        .wood-card:hover {
+            border-color: rgba(255, 69, 0, 0.6);
+            transform: translateY(-4px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Floating animation for hero food graphics */
+        @keyframes floating {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-floating {
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #140c07;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff4500;
+            border-radius: 4px;
+        }
+
+        /* Wheel animation styling */
+        #wheelCanvas {
+            transition: transform 4s cubic-bezier(0.15, 0.99, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-fire-500 selection:text-white">
+
+    <!-- METALLIC TOP NAVBAR -->
+    <header class="metallic-navbar sticky top-0 z-40 text-white px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Logo & Brand -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-fire-600 to-amber-gold flex items-center justify-center shadow-lg text-xl font-black text-white border border-amber-400">
+                    <i class="fa-solid font-bold fa-burger"></i>
+                </div>
+                <div>
+                    <span class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-amber-200 to-fire-500">
+                        FOODIE<span class="text-fire-500">HUB</span>
+                    </span>
+                    <p class="text-[10px] text-amber-400 font-bold uppercase tracking-widest -mt-1">Agra Express Fast Food</p>
+                </div>
+            </div>
+
+            <!-- Voice Search & Search Input -->
+            <div class="hidden md:flex flex-1 max-w-md mx-4 relative items-center">
+                <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search Pizzas, Momos, Chowmein, Energy Drinks..." 
+                    class="w-full bg-wood-950 border border-amber-900/60 rounded-full py-2 pl-10 pr-10 text-sm text-gray-200 focus:outline-none focus:border-fire-500 shadow-inner">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-gray-400 text-sm"></i>
+                <button onclick="startVoiceSearch()" title="Voice Search" class="absolute right-3 text-fire-500 hover:text-amber-400 text-sm p-1">
+                    <i class="fa-solid fa-microphone" id="micIcon"></i>
+                </button>
+            </div>
+
+            <!-- Action Controls & Wallet -->
+            <div class="flex items-center gap-3">
+                <!-- Sound Toggle -->
+                <button onclick="toggleAudio()" id="soundBtn" class="p-2 rounded-full bg-wood-900 border border-gray-700 text-amber-400 hover:bg-wood-800 transition" title="Sound Effects">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+
+                <!-- Spin & Win Button -->
+                <button onclick="openWheelModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-yellow-500 text-xs font-bold text-black hover:scale-105 transition shadow-lg">
+                    <i class="fa-solid fa-compact-disc fa-spin"></i>
+                    <span>Spin & Win</span>
+                </button>
+
+                <!-- Loyalty Wallet -->
+                <div class="hidden lg:flex items-center gap-2 bg-wood-950/80 border border-amber-600/40 rounded-full px-3 py-1 text-xs">
+                    <i class="fa-solid fa-coins text-amber-gold"></i>
+                    <span id="userCoins" class="font-bold text-amber-300">150</span>
+                    <span class="text-gray-400">Coins</span>
+                </div>
+
+                <!-- Call Agra Support Direct -->
+                <a href="tel:6397760703" class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg">
+                    <i class="fa-solid fa-phone-volume"></i>
+                    <span class="hidden sm:inline">Support</span>
+                </a>
+
+                <!-- Cart Button -->
+                <button onclick="toggleCartDrawer()" class="relative bg-gradient-to-r from-fire-600 to-fire-700 text-white p-2.5 rounded-full shadow-lg hover:brightness-110 transition flex items-center justify-center">
+                    <i class="fa-solid fa-basket-shopping text-base"></i>
+                    <span id="cartBadge" class="absolute -top-1 -right-1 bg-amber-gold text-black text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MOBILE SEARCH BAR BAR -->
+    <div class="md:hidden bg-wood-900 p-2.5 border-b border-amber-900/40 px-4">
+        <div class="relative flex items-center">
+            <input type="text" oninput="handleSearch(this.value)" placeholder="Search Pizzas, Momos, Drinks..." 
+                class="w-full bg-wood-950 border border-amber-900/60 rounded-full py-1.5 pl-9 pr-9 text-xs text-gray-200 focus:outline-none focus:border-fire-500">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 text-gray-400 text-xs"></i>
+            <button onclick="startVoiceSearch()" class="absolute right-3 text-fire-500 text-xs">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- NAVIGATION TABS -->
+        <nav class="flex items-center justify-between border-b border-amber-900/40 pb-3 mb-6 overflow-x-auto gap-2 text-sm no-scrollbar">
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('home')" id="tab-home" class="nav-tab px-4 py-2 rounded-xl bg-fire-600 font-bold text-white shadow">
+                    <i class="fa-solid fa-fire mr-1.5"></i> Menu Showcase
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="nav-tab px-4 py-2 rounded-xl bg-wood-900 text-gray-300 font-medium hover:bg-wood-800 hover:text-white border border-amber-900/30">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-amber-gold"></i> Mood Quiz
+                </button>
+                <button onclick="switchTab('tracker')" id="tab-tracker" class="nav-tab px-4 py-2 rounded-xl bg-wood-900 text-gray-300 font-medium hover:bg-wood-800 hover:text-white border border-amber-900/30">
+                    <i class="fa-solid fa-location-crosshairs mr-1.5 text-fire-500"></i> Live Order GPS
+                </button>
+                <button onclick="switchTab('history')" id="tab-history" class="nav-tab px-4 py-2 rounded-xl bg-wood-900 text-gray-300 font-medium hover:bg-wood-800 hover:text-white border border-amber-900/30">
+                    <i class="fa-solid fa-receipt mr-1.5 text-blue-400"></i> Order History
+                </button>
+            </div>
+            
+            <!-- Late Delivery Emergency Quick Link -->
+            <button onclick="switchTab('tracker'); scrollToHelpline();" class="shrink-0 text-xs bg-red-950/80 border border-red-600/60 hover:bg-red-900 text-red-200 px-3 py-2 rounded-xl font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-headset text-red-400 animate-pulse"></i>
+                <span>Agra Delivery Helpline</span>
+            </button>
+        </nav>
+
+        <!-- VIEW 1: HOME & MENU SHOWCASE -->
+        <div id="view-home" class="space-y-8">
+
+            <!-- HERO SHOWCASE SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center rounded-3xl p-6 lg:p-8 wood-card relative overflow-hidden">
+                <!-- Background ambient gradient -->
+                <div class="absolute -right-16 -top-16 w-80 h-80 bg-fire-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Left Hero Text -->
+                <div class="space-y-4 lg:col-span-1 z-10">
+                    <span class="px-3 py-1 rounded-full bg-amber-gold/20 text-amber-400 border border-amber-gold/30 text-xs font-black uppercase tracking-widest inline-block">
+                        🔥 Hot & Fresh Express Agra
+                    </span>
+                    <h1 class="text-3xl lg:text-5xl font-extrabold text-white leading-tight">
+                        Craving <span class="text-transparent bg-clip-text bg-gradient-to-r from-fire-500 via-amber-400 to-amber- gold">Cheesy Goodness?</span>
+                    </h1>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Order sizzling Pizzas, crispy Kurkure Momos, Schezwan Chowmein, loaded Nachos, & iced Energy Drinks. Lightning delivery across Agra!
+                    </p>
+                    <div class="flex items-center gap-3 pt-2">
+                        <button onclick="scrollToMenu()" class="px-6 py-3 rounded-full bg-gradient-to-r from-fire-600 to-fire-700 text-white font-bold text-sm shadow-xl hover:scale-105 transition flex items-center gap-2">
+                            <span>Explore Full Menu</span>
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                        <button onclick="openWheelModal()" class="px-4 py-3 rounded-full bg-wood-950 border border-amber-500/40 text-amber-300 font-semibold text-sm hover:bg-wood-900 transition flex items-center gap-2">
+                            <i class="fa-solid fa-gift text-amber-gold"></i>
+                            <span>Get Offer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Center Video Preview Banner -->
+                <div class="lg:col-span-1 flex justify-center z-10">
+                    <div class="w-full max-w-sm rounded-2xl overflow-hidden border-2 border-amber-600/40 shadow-2xl bg-black relative group">
+                        <video class="w-full h-48 object-cover rounded-2xl" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80">
+                            <source src="https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-pizza-with-cheese-and-tomatoes-42898-large.mp4" type="video/mp4">
+                            Your browser does not support video preview.
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-3">
+                            <p class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle text-red-500 text-[8px] animate-ping"></i> Live Kitchen Sizzle Cam
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Floating Graphic Showcase -->
+                <div class="hidden lg:flex lg:col-span-1 justify-center relative z-10">
+                    <div class="relative w-64 h-64 flex items-center justify-center">
+                        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80" alt="Special Burger" class="w-52 h-52 object-cover rounded-full border-4 border-fire-500 shadow-2xl animate-floating">
+                        <!-- Floating badge -->
+                        <div class="absolute bottom-2 right-0 bg-amber-gold text-black font-extrabold px-3 py-1.5 rounded-2xl text-xs shadow-xl rotate-6">
+                            ⚡ 20 Min Delivery
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORY FILTER BUTTONS -->
+            <div id="menuCategories" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-utensils text-fire-500"></i> Fast Food Categories
+                    </h2>
+                    <span class="text-xs text-gray-400">Custom Spice & Dips Available</span>
+                </div>
+
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar" id="categoryContainer">
+                    <!-- Dynamic categories injected here -->
+                </div>
+            </div>
+
+            <!-- PRODUCT GRID -->
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Dynamic product cards -->
+            </div>
+        </div>
+
+        <!-- VIEW 2: AI MOOD QUIZ -->
+        <div id="view-quiz" class="hidden max-w-2xl mx-auto wood-card rounded-3xl p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <span class="text-3xl">🤖</span>
+                <h2 class="text-2xl font-black text-white">Foodie AI Mood Matcher</h2>
+                <p class="text-xs text-gray-400">Tell us how you're feeling and we'll craft your ultimate fast food craving!</p>
+            </div>
+
+            <div class="space-y-4" id="quizStepContainer">
+                <!-- Quiz questions dynamically rendered -->
+            </div>
+        </div>
+
+        <!-- VIEW 3: LIVE TRACKER & HELPLINE -->
+        <div id="view-tracker" class="hidden space-y-8">
+            <div class="wood-card rounded-3xl p-6 lg:p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-amber-900/40 pb-4">
+                    <div>
+                        <span class="text-xs text-fire-500 font-bold uppercase tracking-wider">Live Status</span>
+                        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                            Order GPS Tracking <i class="fa-solid fa-satellite-dish text-emerald-400 animate-pulse text-sm"></i>
+                        </h2>
+                        <p class="text-xs text-gray-400">Order ID: <span id="trackOrderId" class="font-mono text-amber-300">#FH-89421</span></p>
+                    </div>
+                    <div class="bg-wood-950 px-4 py-2 rounded-2xl border border-amber-600/30 text-right">
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Estimated Arrival</p>
+                        <p id="trackEta" class="text-lg font-black text-amber-gold">22 Mins</p>
+                    </div>
+                </div>
+
+                <!-- 4-Step Tracker Timeline -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative py-4">
+                    <div class="step-box p-4 rounded-2xl bg-fire-600/20 border border-fire-500 text-center space-y-2" id="step-1">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-fire-500 text-white flex items-center justify-center font-bold">1</div>
+                        <p class="text-xs font-extrabold text-white">Order Confirmed</p>
+                        <p class="text-[10px] text-gray-400">Sent to Kitchen</p>
+                    </div>
+                    <div class="step-box p-4 rounded-2xl bg-wood-950 border border-gray-800 text-center space-y-2" id="step-2">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-gray-800 text-gray-400 flex items-center justify-center font-bold">2</div>
+                        <p class="text-xs font-extrabold text-gray-300">Sizzling & Cooking</p>
+                        <p class="text-[10px] text-gray-500">Chef preparing food</p>
+                    </div>
+                    <div class="step-box p-4 rounded-2xl bg-wood-950 border border-gray-800 text-center space-y-2" id="step-3">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-gray-800 text-gray-400 flex items-center justify-center font-bold">3</div>
+                        <p class="text-xs font-extrabold text-gray-300">Out For Delivery</p>
+                        <p class="text-[10px] text-gray-500">Rider on the way</p>
+                    </div>
+                    <div class="step-box p-4 rounded-2xl bg-wood-950 border border-gray-800 text-center space-y-2" id="step-4">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-gray-800 text-gray-400 flex items-center justify-center font-bold">4</div>
+                        <p class="text-xs font-extrabold text-gray-300">Delivered</p>
+                        <p class="text-[10px] text-gray-500">Enjoy your meal!</p>
+                    </div>
+                </div>
+
+                <!-- Simulated Map Box -->
+                <div class="w-full h-56 rounded-2xl bg-wood-950 border border-amber-900/50 relative overflow-hidden flex items-center justify-center p-4">
+                    <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80" alt="Map Simulation" class="absolute inset-0 w-full h-full object-cover opacity-20">
+                    <div class="relative z-10 text-center space-y-2 bg-wood-900/90 backdrop-blur border border-amber-600/40 p-4 rounded-2xl max-w-sm">
+                        <i class="fa-solid fa-motorcycle text-fire-500 text-3xl animate-bounce"></i>
+                        <p class="text-xs font-bold text-gray-200">Delivery Partner Assigned</p>
+                        <p class="text-[11px] text-amber-300 font-semibold">Agra Express Rider: Rahul Sharma</p>
+                        <div class="flex justify-center gap-2 pt-1">
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">On Time</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-wood-950 text-gray-300 border border-gray-700">Bike: UP 80 AB 9021</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DEDICATED LATE DELIVERY HELPLINE & AUTOMATED CALL ALERT SYSTEM -->
+            <div id="helplineSection" class="wood-card rounded-3xl p-6 lg:p-8 border-2 border-red-600/60 bg-gradient-to-br from-wood-900 via-red-950/20 to-wood-950 space-y-6 shadow-2xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-red-900/50 pb-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-wider">
+                                Urgent Support
+                            </span>
+                            <span class="text-xs text-red-400 font-bold">Agra Delivery Escalation</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Order Late Ya Delivery Boy Response Nahi Dera?
+                        </h3>
+                        <p class="text-xs text-gray-300">
+                            Directly connect with <strong class="text-amber-300">Ramnivas Rajput (Agra Express Delivery Manager)</strong> for immediate resolution.
+                        </p>
+                    </div>
+
+                    <!-- Direct Action Buttons -->
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Direct Phone Call -->
+                        <a href="tel:6397760703" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold text-xs shadow-lg hover:brightness-110 transition flex items-center gap-2">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>Call Now: 6397760703</span>
+                        </a>
+
+                        <!-- Direct WhatsApp Complaint -->
+                        <a href="https://wa.me/916397760703?text=Hello%20Ramnivas%20Rajput%20Sir,%20mera%20FoodieHub%20order%20late%20ho%20gaya%20hai.%20Please%20check%20kijiye!" target="_blank" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-extrabold text-xs shadow-lg hover:brightness-110 transition flex items-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            <span>WhatsApp Complaint</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact Manager Card & Alert Trigger -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-wood-950 p-4 rounded-2xl border border-amber-900/40 space-y-2">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Agra Zone Manager</p>
+                        <p class="text-sm font-black text-white">Ramnivas Rajput</p>
+                        <p class="text-xs text-gray-300"><i class="fa-solid fa-envelope text-fire-500 mr-1.5"></i>rr3075270@gmail.com</p>
+                        <p class="text-xs text-gray-300"><i class="fa-solid fa-phone text-emerald-400 mr-1.5"></i>+91 6397760703</p>
+                    </div>
+
+                    <div class="bg-wood-950 p-4 rounded-2xl border border-amber-900/40 space-y-2">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Issue Categories</p>
+                        <ul class="text-xs text-gray-300 space-y-1">
+                            <li><i class="fa-solid fa-clock text-amber-gold mr-1.5"></i> Delivery Rider Delay (>30 mins)</li>
+                            <li><i class="fa-solid fa-phone-slash text-red-400 mr-1.5"></i> Rider Phone Unreachable</li>
+                            <li><i class="fa-solid fa-box-open text-blue-400 mr-1.5"></i> Missing Items in Fast Food Box</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-wood-950 p-4 rounded-2xl border border-red-900/50 flex flex-col justify-between space-y-3">
+                        <div>
+                            <p class="text-[10px] text-red-400 font-bold uppercase">Automated Alert System</p>
+                            <p class="text-xs text-gray-300">Send an instant priority callback alert to Ramnivas Rajput's manager dashboard.</p>
+                        </div>
+                        <button onclick="triggerAutomatedCallAlert()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-fire-600 hover:from-red-700 hover:to-fire-700 text-white font-black text-xs shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bell-concierge"></i>
+                            <span>Trigger Priority Call Request</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: ORDER HISTORY -->
+        <div id="view-history" class="hidden space-y-4 max-w-4xl mx-auto">
+            <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-amber-gold"></i> Order History
+            </h2>
+            <div id="orderHistoryList" class="space-y-4">
+                <!-- Dynamic order history list -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- CUSTOMIZATION MODAL (SPICE LEVEL, DIPS & OPTIONS) -->
+    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card w-full max-w-lg rounded-3xl p-6 space-y-6 relative border-2 border-fire-500 animate-scaleUp">
+            <button onclick="closeCustomModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex gap-4 items-center border-b border-amber-900/40 pb-4">
+                <img id="modalImg" src="" alt="Product" class="w-20 h-20 object-cover rounded-2xl border border-amber-500/40 shadow">
+                <div>
+                    <h3 id="modalTitle" class="text-xl font-black text-white">Item Name</h3>
+                    <p id="modalCategory" class="text-xs text-amber-gold font-bold">Category</p>
+                    <p id="modalBasePrice" class="text-sm font-extrabold text-fire-500 mt-1">₹199</p>
+                </div>
+            </div>
+
+            <!-- Customization Options -->
+            <div class="space-y-4">
+                <!-- Spice Level -->
+                <div id="spiceSection" class="space-y-2">
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-pepper-hot text-fire-500"></i> Select Spice Level
+                    </label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="selectSpice('Mild')" class="spice-btn p-2 rounded-xl bg-wood-950 border border-gray-800 text-xs text-gray-300 hover:border-fire-500 font-bold" data-spice="Mild">🌶️ Mild</button>
+                        <button onclick="selectSpice('Medium')" class="spice-btn p-2 rounded-xl bg-fire-600/30 border border-fire-500 text-xs text-white font-bold" data-spice="Medium">🌶️🌶️ Medium</button>
+                        <button onclick="selectSpice('Fiery Hot')" class="spice-btn p-2 rounded-xl bg-wood-950 border border-gray-800 text-xs text-gray-300 hover:border-fire-500 font-bold" data-spice="Fiery Hot">🔥 Fiery Hot</button>
+                    </div>
+                </div>
+
+                <!-- Dips & Extra Customization -->
+                <div id="dipsSection" class="space-y-2">
+                    <label class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-bowl-food text-amber-gold"></i> Choose Favorite Dip (+₹25)
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2 rounded-xl bg-wood-950 border border-amber-900/30 text-xs text-gray-300 cursor-pointer">
+                            <input type="checkbox" value="Tandoori Mayo" class="dip-checkbox accent-fire-500" onchange="calculateModalTotal()">
+                            <span>Tandoori Mayo (+₹25)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl bg-wood-950 border border-amber-900/30 text-xs text-gray-300 cursor-pointer">
+                            <input type="checkbox" value="Schezwan Dip" class="dip-checkbox accent-fire-500" onchange="calculateModalTotal()">
+                            <span>Schezwan Dip (+₹25)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl bg-wood-950 border border-amber-900/30 text-xs text-gray-300 cursor-pointer">
+                            <input type="checkbox" value="Cheesy Jalapeno" class="dip-checkbox accent-fire-500" onchange="calculateModalTotal()">
+                            <span>Cheesy Dip (+₹25)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-xl bg-wood-950 border border-amber-900/30 text-xs text-gray-300 cursor-pointer">
+                            <input type="checkbox" value="Mint Chutney" class="dip-checkbox accent-fire-500" onchange="calculateModalTotal()">
+                            <span>Mint Chutney (+₹25)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="flex items-center justify-between border-t border-amber-900/40 pt-4">
+                <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">Total Price</p>
+                    <p id="modalFinalPrice" class="text-2xl font-black text-white">₹199</p>
+                </div>
+                <button onclick="confirmAddToCart()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-fire-600 to-fire-700 hover:from-fire-500 hover:to-fire-600 text-white font-black text-sm shadow-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span>Add To Basket</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPIN & WIN WHEEL MODAL -->
+    <div id="wheelModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card w-full max-w-md rounded-3xl p-6 text-center space-y-6 relative border-2 border-amber-500">
+            <button onclick="closeWheelModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div>
+                <h3 class="text-2xl font-black text-white">Spin & Win Foodie Coins!</h3>
+                <p class="text-xs text-amber-300">Spin the wheel to win instant coins or discounts</p>
+            </div>
+
+            <div class="relative w-64 h-64 mx-auto flex items-center justify-center">
+                <!-- Pointer -->
+                <div class="absolute -top-3 z-20 text-fire-500 text-2xl filter drop-shadow">
+                    <i class="fa-solid fa-caret-down"></i>
+                </div>
+                <canvas id="wheelCanvas" width="250" height="250" class="rounded-full border-4 border-amber-gold shadow-2xl"></canvas>
+            </div>
+
+            <button id="spinBtn" onclick="spinWheel()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-black text-sm shadow-xl transition">
+                SPIN NOW!
+            </button>
+        </div>
+    </div>
+
+    <!-- CART SIDE DRAWER -->
+    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-wood-950 border-l border-amber-900/50 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
+        <!-- Cart Header -->
+        <div class="p-4 border-b border-amber-900/40 flex items-center justify-between metallic-navbar">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-basket-shopping text-fire-500"></i>
+                <h3 class="text-lg font-black text-white">Your Food Basket</h3>
+            </div>
+            <button onclick="toggleCartDrawer()" class="text-gray-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cartItemsContainer" class="p-4 flex-1 overflow-y-auto space-y-3">
+            <!-- Dynamic Cart Items -->
+        </div>
+
+        <!-- Cart Footer & Checkout -->
+        <div class="p-4 border-t border-amber-900/50 bg-wood-900 space-y-3">
+            <div class="space-y-1 text-xs">
+                <div class="flex justify-between text-gray-400">
+                    <span>Subtotal</span>
+                    <span id="cartSubtotal" class="font-bold text-white">₹0</span>
+                </div>
+                <div class="flex justify-between text-gray-400">
+                    <span>Delivery Fee (Agra Express)</span>
+                    <span class="font-bold text-emerald-400">₹30</span>
+                </div>
+                <div class="flex justify-between text-base font-black text-white pt-2 border-t border-gray-800">
+                    <span>Grand Total</span>
+                    <span id="cartGrandTotal" class="text-fire-500">₹30</span>
+                </div>
+            </div>
+
+            <!-- Checkout Form Controls -->
+            <div class="space-y-2 pt-2">
+                <input type="text" id="custName" placeholder="Your Name" class="w-full bg-wood-950 border border-amber-900/60 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-fire-500">
+                <input type="tel" id="custPhone" placeholder="Mobile Number" class="w-full bg-wood-950 border border-amber-900/60 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-fire-500">
+                <input type="text" id="custAddress" placeholder="Agra Delivery Address" class="w-full bg-wood-950 border border-amber-900/60 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-fire-500">
+            </div>
+
+            <button onclick="processCheckout()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-fire-600 to-fire-700 hover:from-fire-500 hover:to-fire-600 text-white font-black text-sm shadow-xl transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check-circle"></i>
+                <span>Place Express Order</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-wood-950 border-t border-amber-900/40 text-gray-400 text-xs py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-fire-600 flex items-center justify-center text-white font-bold text-sm">F</div>
+                    <span class="text-lg font-black text-white">FOODIE<span class="text-fire-500">HUB</span></span>
+                </div>
+                <p class="text-gray-400 leading-relaxed">
+                    Premium dark wooden styled fast food express. Specializing in crispy Pizzas, Kurkure Momos, Schezwan Chowmein, loaded Fries, and cold Energy Drinks.
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="text-sm font-bold text-white uppercase tracking-wider">Agra Fast Food Express</h4>
+                <p><i class="fa-solid fa-location-dot text-fire-500 mr-2"></i> Taj Nagari Phase 2, Agra, UP</p>
+                <p><i class="fa-solid fa-headset text-emerald-400 mr-2"></i> Helpline: +91 6397760703</p>
+                <p><i class="fa-solid fa-user-shield text-amber-gold mr-2"></i> Delivery Manager: Ramnivas Rajput</p>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="text-sm font-bold text-white uppercase tracking-wider">Customer Emergency Call</h4>
+                <p class="text-gray-400">Order late hone par direct call karein manager ko:</p>
+                <a href="tel:6397760703" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-950 border border-red-600 text-red-200 font-bold hover:bg-red-900 transition">
+                    <i class="fa-solid fa-phone text-red-400 animate-pulse"></i>
+                    <span>Call Manager: 6397760703</span>
+                </a>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 mt-6 pt-4 border-t border-gray-900 text-center text-gray-500">
+            © 2026 FoodieHub Agra Fast Express. All rights reserved. Managed by Ramnivas Rajput.
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // AUDIO FX CONTROLLER (Web Audio API synthesis for zero external URLs)
+        let soundEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.frequency.value = 600;
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'add') {
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'alert') {
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio playback allowed after user click');
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundBtn');
+            btn.innerHTML = soundEnabled 
+                ? '<i class="fa-solid fa-volume-high text-sm"></i>' 
+                : '<i class="fa-solid fa-volume-xmark text-sm text-gray-500"></i>';
+        }
+
+        // PRODUCTS DATABASE (NO Garlic Bread / NO Garlic Paste)
+        const products = [
+            // PIZZAS
+            { id: 101, name: 'Margherita Pizza', category: 'Pizzas', price: 199, rating: 4.8, img: 'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?auto=format&fit=crop&w=500&q=80', desc: 'Classic mozzarella cheese & rich fresh tomato sauce blend.' },
+            { id: 102, name: 'Farmhouse Special', category: 'Pizzas', price: 289, rating: 4.9, img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80', desc: 'Loaded with crunchy capsicum, sweet corn, mushroom & onion.' },
+            { id: 103, name: 'Pepperoni Feast Pizza', category: 'Pizzas', price: 349, rating: 4.9, img: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=500&q=80', desc: 'Generous spicy pepperoni slices with double melted mozzarella.' },
+            { id: 104, name: 'Paneer Tikka Pizza', category: 'Pizzas', price: 299, rating: 4.7, img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80', desc: 'Tandoori marinated paneer cubes, red paprika & mint drizzle.' },
+            { id: 105, name: 'BBQ Chicken Pizza', category: 'Pizzas', price: 329, rating: 4.8, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80', desc: 'Smoky BBQ glazed chicken chunks with crispy onions.' },
+            { id: 106, name: 'Cheesy Burst Pizza', category: 'Pizzas', price: 359, rating: 5.0, img: 'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=500&q=80', desc: 'Molten cheese stuffed crust with double cheese topping.' },
+            { id: 107, name: 'Mushroom & Corn Delight', category: 'Pizzas', price: 259, rating: 4.6, img: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=500&q=80', desc: 'Juicy golden sweet corn and fresh farm mushrooms.' },
+
+            // MOMOS
+            { id: 201, name: 'Steam Veg Momos (8 Pcs)', category: 'Momos', price: 110, rating: 4.7, img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=500&q=80', desc: 'Thin dough wrapper stuffed with seasoned vegetables.' },
+            { id: 202, name: 'Fried Paneer Momos', category: 'Momos', price: 140, rating: 4.8, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80', desc: 'Deep fried crispy momos with paneer stuffing.' },
+            { id: 203, name: 'Kurkure Spicy Momos', category: 'Momos', price: 160, rating: 4.9, img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=500&q=80', desc: 'Extra crunchy cornflake coated crunchy momos.' },
+            { id: 204, name: 'Schezwan Gravy Momos', category: 'Momos', price: 170, rating: 4.8, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80', desc: 'Tossed in fiery spicy red Schezwan wok gravy.' },
+            { id: 205, name: 'Tandoori Afghani Momos', category: 'Momos', price: 180, rating: 5.0, img: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=500&q=80', desc: 'Creamy malai & tandoori charcoal char roasted momos.' },
+            { id: 206, name: 'Cheese Burst Momos', category: 'Momos', price: 190, rating: 4.9, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80', desc: 'Molten cheese oozing out with every bite.' },
+
+            // CHOWMEIN & NOODLES
+            { id: 301, name: 'Classic Veg Chowmein', category: 'Chowmein', price: 120, rating: 4.6, img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80', desc: 'Wok tossed noodles with crunchy cabbage & peppers.' },
+            { id: 302, name: 'Hakka Noodles Special', category: 'Chowmein', price: 140, rating: 4.7, img: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=500&q=80', desc: 'Mild Chinese street style long Hakka noodles.' },
+            { id: 303, name: 'Chicken Chilli Noodles', category: 'Chowmein', price: 180, rating: 4.9, img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80', desc: 'Shredded chicken and hot green chili tossed noodles.' },
+            { id: 304, name: 'Schezwan Fiery Chowmein', category: 'Chowmein', price: 150, rating: 4.8, img: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=500&q=80', desc: 'Hot Schezwan chili paste wok tossed noodles.' },
+            { id: 305, name: 'Singapuri Spicy Noodles', category: 'Chowmein', price: 160, rating: 4.7, img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80', desc: 'Yellow curry flavored rice noodles with bell peppers.' },
+            { id: 306, name: 'Paneer Loaded Chowmein', category: 'Chowmein', price: 170, rating: 4.9, img: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=500&q=80', desc: 'Stir fried noodles loaded with soft spiced paneer cubes.' },
+
+            // COLD & ENERGY DRINKS
+            { id: 401, name: 'Coca-Cola (750ml)', category: 'Cold Drinks', price: 50, rating: 4.8, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80', desc: 'Chilled refreshing fizzy cola.' },
+            { id: 402, name: 'Thums Up (750ml)', category: 'Cold Drinks', price: 50, rating: 4.9, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80', desc: 'Strong thunder taste fizzy cold drink.' },
+            { id: 403, name: 'Sprite (750ml)', category: 'Cold Drinks', price: 50, rating: 4.7, img: 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=500&q=80', desc: 'Crisp lemon-lime clear drink.' },
+            { id: 404, name: 'Pepsi (750ml)', category: 'Cold Drinks', price: 50, rating: 4.8, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80', desc: 'Sweet fizzy cola refreshment.' },
+            { id: 405, name: 'Fanta Orange (750ml)', category: 'Cold Drinks', price: 50, rating: 4.7, img: 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=500&q=80', desc: 'Bright citrus orange fizzy drink.' },
+            { id: 406, name: 'Sting Energy Drink Can', category: 'Cold Drinks', price: 30, rating: 4.9, img: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=500&q=80', desc: 'Red berry charged instant energy rush.' },
+            { id: 407, name: 'Red Bull Energy Can', category: 'Cold Drinks', price: 125, rating: 5.0, img: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=500&q=80', desc: 'Gives you wings - chilled energy drink.' },
+            { id: 408, name: 'Monster Energy Drink', category: 'Cold Drinks', price: 135, rating: 4.9, img: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=500&q=80', desc: '500ml power energy punch.' },
+            { id: 409, name: 'Mountain Dew (750ml)', category: 'Cold Drinks', price: 50, rating: 4.8, img: 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=500&q=80', desc: 'Darr ke aage jeet hai - neon citrus kick.' },
+            { id: 410, name: 'Maaza Mango Drink', category: 'Cold Drinks', price: 45, rating: 4.8, img: 'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=500&q=80', desc: 'Rich Alphonso mango fruit juice.' },
+            { id: 411, name: 'Thick Iced Cold Coffee', category: 'Cold Drinks', price: 99, rating: 4.9, img: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80', desc: 'Blended espresso with cold milk and chocolate drip.' },
+
+            // SNACKS, FRIES, NACHOS & COMBOS
+            { id: 501, name: 'Peri Peri Loaded Fries', category: 'Sides & Combos', price: 120, rating: 4.9, img: 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=500&q=80', desc: 'Crispy potato fries dusted in spicy peri peri spice.' },
+            { id: 502, name: 'Cheesy Loaded Nachos', category: 'Sides & Combos', price: 150, rating: 4.8, img: 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?auto=format&fit=crop&w=500&q=80', desc: 'Corn chips topped with warm cheese sauce & jalapeños.' },
+            { id: 503, name: 'Belgian Chocolate Waffle', category: 'Sides & Combos', price: 140, rating: 5.0, img: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=500&q=80', desc: 'Warm waffle drenched in rich dark Belgian chocolate.' },
+            { id: 504, name: 'Ultimate Fast Food Combo Box', category: 'Sides & Combos', price: 399, rating: 5.0, img: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=500&q=80', desc: '1 Medium Pizza + 6 Kurkure Momos + Loaded Fries + Cold Drink.' }
+        ];
+
+        let cart = [];
+        let activeCategory = 'All';
+        let currentCustomItem = null;
+        let selectedSpiceLevel = 'Medium';
+
+        // INITIALIZATION
+        window.onload = function() {
+            renderCategories();
+            renderProducts();
+            initWheel();
+            loadCoins();
+        };
+
+        // RENDER CATEGORIES
+        const categories = ['All', 'Pizzas', 'Momos', 'Chowmein', 'Cold Drinks', 'Sides & Combos'];
+
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="filterCategory('${cat}')" 
+                    class="px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition border ${activeCategory === cat ? 'bg-fire-600 text-white border-fire-500 shadow-lg' : 'bg-wood-950 text-gray-300 border-amber-900/40 hover:bg-wood-900'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            playSound('click');
+            activeCategory = cat;
+            renderCategories();
+            renderProducts();
+        }
+
+        // RENDER PRODUCTS
+        function renderProducts(searchQuery = '') {
+            const grid = document.getElementById('productGrid');
+            let filtered = products.filter(p => {
+                const matchesCat = activeCategory === 'All' || p.category === activeCategory;
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      p.desc.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400 space-y-2">
+                        <i class="fa-solid fa-utensils text-3xl text-fire-500"></i>
+                        <p class="font-bold text-base">No fast food items found!</p>
+                        <p class="text-xs text-gray-500">Try searching for Pizza, Momos, Chowmein, or Red Bull</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="wood-card rounded-3xl p-4 flex flex-col justify-between space-y-3 group">
+                    <div class="relative overflow-hidden rounded-2xl h-44 bg-wood-950">
+                        <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <span class="absolute top-2 left-2 bg-black/80 backdrop-blur text-amber-gold font-black text-[10px] px-2.5 py-1 rounded-full border border-amber-500/40">
+                            ★ ${p.rating}
+                        </span>
+                        <span class="absolute top-2 right-2 bg-fire-600 text-white font-extrabold text-[10px] px-2.5 py-1 rounded-full">
+                            ${p.category}
+                        </span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <h3 class="font-extrabold text-white text-base leading-snug group-hover:text-amber-300 transition">${p.name}</h3>
+                        <p class="text-xs text-gray-400 line-clamp-2">${p.desc}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-amber-900/30">
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase font-bold block">Price</span>
+                            <span class="text-lg font-black text-fire-500">₹${p.price}</span>
+                        </div>
+                        <button onclick="openCustomModal(${p.id})" class="px-4 py-2 rounded-xl bg-gradient-to-r from-fire-600 to-fire-700 hover:from-fire-500 hover:to-fire-600 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Customize</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // SEARCH HANDLING & VOICE SEARCH
+        function handleSearch(val) {
+            renderProducts(val);
+        }
+
+        function startVoiceSearch() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice search is not supported in this browser.');
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            const micIcon = document.getElementById('micIcon');
+            micIcon.classList.add('animate-pulse', 'text-amber-gold');
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('searchInput').value = transcript;
+                handleSearch(transcript);
+                micIcon.classList.remove('animate-pulse', 'text-amber-gold');
+            };
+            recognition.onerror = function() {
+                micIcon.classList.remove('animate-pulse', 'text-amber-gold');
+            };
+            recognition.start();
+        }
+
+        // CUSTOMIZATION MODAL LOGIC
+        function openCustomModal(productId) {
+            playSound('click');
+            currentCustomItem = products.find(p => p.id === productId);
+            if (!currentCustomItem) return;
+
+            document.getElementById('modalImg').src = currentCustomItem.img;
+            document.getElementById('modalTitle').innerText = currentCustomItem.name;
+            document.getElementById('modalCategory').innerText = currentCustomItem.category;
+            document.getElementById('modalBasePrice').innerText = '₹' + currentCustomItem.price;
+
+            // Reset checkboxes & spice
+            document.querySelectorAll('.dip-checkbox').forEach(cb => cb.checked = false);
+            selectSpice('Medium');
+
+            calculateModalTotal();
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function selectSpice(level) {
+            selectedSpiceLevel = level;
+            document.querySelectorAll('.spice-btn').forEach(btn => {
+                if (btn.dataset.spice === level) {
+                    btn.className = 'spice-btn p-2 rounded-xl bg-fire-600/30 border border-fire-500 text-xs text-white font-bold';
+                } else {
+                    btn.className = 'spice-btn p-2 rounded-xl bg-wood-950 border border-gray-800 text-xs text-gray-300 hover:border-fire-500 font-bold';
+                }
+            });
+        }
+
+        function calculateModalTotal() {
+            if (!currentCustomItem) return;
+            let total = currentCustomItem.price;
+            const dips = document.querySelectorAll('.dip-checkbox:checked');
+            total += dips.length * 25;
+            document.getElementById('modalFinalPrice').innerText = '₹' + total;
+            return total;
+        }
+
+        function confirmAddToCart() {
+            playSound('add');
+            const total = calculateModalTotal();
+            const selectedDips = Array.from(document.querySelectorAll('.dip-checkbox:checked')).map(cb => cb.value);
+
+            const cartItem = {
+                id: Date.now(),
+                productId: currentCustomItem.id,
+                name: currentCustomItem.name,
+                category: currentCustomItem.category,
+                price: total,
+                spice: selectedSpiceLevel,
+                dips: selectedDips,
+                qty: 1
+            };
+
+            cart.push(cartItem);
+            updateCartUI();
+            closeCustomModal();
+            toggleCartDrawer(true);
+        }
+
+        // CART DRAWER LOGIC
+        function toggleCartDrawer(forceOpen = false) {
+            playSound('click');
+            const drawer = document.getElementById('cartDrawer');
+            if (forceOpen || drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('translate-x-full');
+            }
+        }
+
+        function updateCartUI() {
+            const badge = document.getElementById('cartBadge');
+            const container = document.getElementById('cartItemsContainer');
+            
+            badge.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500 space-y-2">
+                        <i class="fa-solid fa-basket-shopping text-3xl"></i>
+                        <p class="text-sm font-bold">Your basket is empty!</p>
+                    </div>
+                `;
+                document.getElementById('cartSubtotal').innerText = '₹0';
+                document.getElementById('cartGrandTotal').innerText = '₹30';
+                return;
+            }
+
+            let subtotal = 0;
+            container.innerHTML = cart.map((item, idx) => {
+                subtotal += item.price * item.qty;
+                return `
+                    <div class="bg-wood-900 border border-amber-900/40 p-3 rounded-2xl flex items-center justify-between text-xs space-x-2">
+                        <div class="flex-1">
+                            <p class="font-extrabold text-white text-sm">${item.name}</p>
+                            <p class="text-[10px] text-amber-gold font-bold">Spice: ${item.spice}</p>
+                            ${item.dips.length ? `<p class="text-[10px] text-gray-400">Dips: ${item.dips.join(', ')}</p>` : ''}
+                            <p class="text-fire-500 font-extrabold mt-1">₹${item.price}</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-wood-950 p-1.5 rounded-xl border border-gray-800">
+                            <button onclick="changeQty(${idx}, -1)" class="w-6 h-6 rounded-lg bg-gray-800 text-white font-bold flex items-center justify-center">-</button>
+                            <span class="font-bold text-white px-1">${item.qty}</span>
+                            <button onclick="changeQty(${idx}, 1)" class="w-6 h-6 rounded-lg bg-fire-600 text-white font-bold flex items-center justify-center">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('cartSubtotal').innerText = '₹' + subtotal;
+            document.getElementById('cartGrandTotal').innerText = '₹' + (subtotal + 30);
+        }
+
+        function changeQty(idx, delta) {
+            cart[idx].qty += delta;
+            if (cart[idx].qty <= 0) {
+                cart.splice(idx, 1);
+            }
+            updateCartUI();
+        }
+
+        // CHECKOUT & GPS TRACKING LOGIC
+        function processCheckout() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const addr = document.getElementById('custAddress').value.trim();
+
+            if (cart.length === 0) {
+                alert('Please add fast food items to your basket before ordering!');
+                return;
+            }
+            if (!name || !phone || !addr) {
+                alert('Please enter your Name, Phone Number, and Delivery Address.');
+                return;
+            }
+
+            playSound('add');
+            const orderId = '#FH-' + Math.floor(10000 + Math.random() * 90000);
+            
+            // Save to order history
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const historyObj = {
+                id: orderId,
+                date: new Date().toLocaleString(),
+                items: [...cart],
+                total: subtotal + 30,
+                status: 'In Progress'
+            };
+
+            let history = JSON.parse(localStorage.getItem('foodieOrders') || '[]');
+            history.unshift(historyObj);
+            localStorage.setItem('foodieOrders', JSON.stringify(history));
+
+            // Award Foodie Coins
+            let currentCoins = parseInt(localStorage.getItem('foodieCoins') || '150');
+            currentCoins += 50;
+            localStorage.setItem('foodieCoins', currentCoins);
+            loadCoins();
+
+            // Reset Cart & Switch to Tracker View
+            cart = [];
+            updateCartUI();
+            toggleCartDrawer();
+
+            document.getElementById('trackOrderId').innerText = orderId;
+            switchTab('tracker');
+            renderHistory();
+
+            alert('🎉 Express Order Placed Successfully! Real-time GPS Tracker activated.');
+        }
+
+        // SPIN & WIN WHEEL LOGIC
+        function openWheelModal() {
+            playSound('click');
+            document.getElementById('wheelModal').classList.remove('hidden');
+        }
+
+        function closeWheelModal() {
+            document.getElementById('wheelModal').classList.add('hidden');
+        }
+
+        function initWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const slices = ['50 Coins', '10% OFF', '100 Coins', 'Free Dip', '20 Coins', 'FREE Drink'];
+            const colors = ['#ff4500', '#22150c', '#ffb700', '#22150c', '#ff4500', '#140c07'];
+
+            const total = slices.length;
+            const arc = (Math.PI * 2) / total;
+
+            for (let i = 0; i < total; i++) {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i];
+                ctx.moveTo(125, 125);
+                ctx.arc(125, 125, 120, i * arc, (i + 1) * arc);
+                ctx.fill();
+                ctx.stroke();
+
+                // Text
+                ctx.save();
+                ctx.translate(125, 125);
+                ctx.rotate(i * arc + arc / 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px Inter';
+                ctx.fillText(slices[i], 45, 5);
+                ctx.restore();
+            }
+        }
+
+        function spinWheel() {
+            playSound('click');
+            const wheel = document.getElementById('wheelCanvas');
+            const deg = 1440 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${deg}deg)`;
+
+            setTimeout(() => {
+                playSound('alert');
+                alert('🎁 Congratulations! You won 100 Extra Foodie Coins!');
+                let currentCoins = parseInt(localStorage.getItem('foodieCoins') || '150');
+                currentCoins += 100;
+                localStorage.setItem('foodieCoins', currentCoins);
+                loadCoins();
+                closeWheelModal();
+            }, 4000);
+        }
+
+        function loadCoins() {
+            const coins = localStorage.getItem('foodieCoins') || '150';
+            document.getElementById('userCoins').innerText = coins;
+        }
+
+        // TAB NAVIGATION SYSTEM
+        function switchTab(tab) {
+            playSound('click');
+            ['home', 'quiz', 'tracker', 'history'].forEach(t => {
+                document.getElementById('view-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).className = 'nav-tab px-4 py-2 rounded-xl bg-wood-900 text-gray-300 font-medium hover:bg-wood-800 border border-amber-900/30';
+            });
+
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).className = 'nav-tab px-4 py-2 rounded-xl bg-fire-600 text-white font-bold shadow';
+
+            if (tab === 'quiz') renderQuiz();
+            if (tab === 'history') renderHistory();
+        }
+
+        function scrollToMenu() {
+            document.getElementById('menuCategories').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToHelpline() {
+            setTimeout(() => {
+                document.getElementById('helplineSection').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // AUTOMATED CALL ALERT TRIGGER (AGRA DELIVERY SUPPORT SYSTEM)
+        function triggerAutomatedCallAlert() {
+            playSound('alert');
+            alert('🚨 AUTOMATED CALL ALERT TRIGGERED!\n\nDelivery Manager Ramnivas Rajput (+91 6397760703) has received your priority delay alert. A callback or status check is initiated.');
+        }
+
+        // MOOD QUIZ LOGIC
+        function renderQuiz() {
+            const container = document.getElementById('quizStepContainer');
+            container.innerHTML = `
+                <div class="space-y-4 text-center">
+                    <p class="text-sm font-extrabold text-white">What mood best describes your craving right now?</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="finishQuiz('spicy')" class="p-3 rounded-2xl bg-wood-950 border border-amber-900/40 hover:border-fire-500 text-xs text-white font-bold">🌶️ Super Spicy & Fiery</button>
+                        <button onclick="finishQuiz('cheesy')" class="p-3 rounded-2xl bg-wood-950 border border-amber-900/40 hover:border-fire-500 text-xs text-white font-bold">🧀 Cheesy & Comforting</button>
+                        <button onclick="finishQuiz('crunchy')" class="p-3 rounded-2xl bg-wood-950 border border-amber-900/40 hover:border-fire-500 text-xs text-white font-bold">🥟 Crunchy Kurkure Momos</button>
+                        <button onclick="finishQuiz('energy')" class="p-3 rounded-2xl bg-wood-950 border border-amber-900/40 hover:border-fire-500 text-xs text-white font-bold">⚡ Chilled Energy Kick</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function finishQuiz(type) {
+            playSound('add');
+            switchTab('home');
+            if (type === 'spicy') filterCategory('Chowmein');
+            if (type === 'cheesy') filterCategory('Pizzas');
+            if (type === 'crunchy') filterCategory('Momos');
+            if (type === 'energy') filterCategory('Cold Drinks');
+        }
+
+        // RENDER ORDER HISTORY
+        function renderHistory() {
+            const container = document.getElementById('orderHistoryList');
+            const history = JSON.parse(localStorage.getItem('foodieOrders') || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="wood-card p-8 text-center rounded-3xl text-gray-400 space-y-2">
+                        <i class="fa-solid fa-receipt text-3xl"></i>
+                        <p class="font-bold text-base">No previous orders found.</p>
+                        <p class="text-xs text-gray-500">Order some fast food to see your order history here!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = history.map(ord => `
+                <div class="wood-card rounded-2xl p-4 space-y-2 border border-amber-900/40">
+                    <div class="flex justify-between items-center text-xs border-b border-gray-800 pb-2">
+                        <div>
+                            <span class="font-mono text-amber-gold font-bold">${ord.id}</span>
+                            <span class="text-gray-400 ml-2">${ord.date}</span>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 font-extrabold text-[10px]">
+                            ${ord.status}
+                        </span>
+                    </div>
+                    <div class="text-xs text-gray-300 space-y-1">
+                        ${ord.items.map(i => `<p>• ${i.qty}x ${i.name} (${i.spice}) - ₹${i.price * i.qty}</p>`).join('')}
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-800 text-xs font-bold">
+                        <span class="text-gray-400">Total Paid</span>
+                        <span class="text-fire-500 text-sm font-black">₹${ord.total}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
